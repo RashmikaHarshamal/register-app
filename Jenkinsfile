@@ -96,12 +96,22 @@ pipeline {
        }
 
 		stage("Trigger CD Pipeline") {
-            steps {
-                script {
-                    sh "curl -v -k --user Jenkins-Master:${JENKINS_API_TOKEN} -X POST -H 'cache-control: no-cache' -H 'content-type: application/x-www-form-urlencoded' --data 'IMAGE_TAG=${IMAGE_TAG}' 'ec2-43-205-140-93.ap-south-1.compute.amazonaws.com:8080/job/gitops-register-app/buildWithParameters?token=gitops-token'"
-                }
-            }
-       }
+		    steps {
+		        script {
+		            echo "Triggering GitOps pipeline with image tag: ${env.IMAGE_TAG}"
+		
+		            build job: "gitops-register-app",
+		                parameters: [
+		                    string(
+		                        name: "IMAGE_TAG",
+		                        value: env.IMAGE_TAG
+		                    )
+		                ],
+		                wait: true,
+		                propagate: true
+		        }
+		    }
+		}
 	}
 
 	 post {
